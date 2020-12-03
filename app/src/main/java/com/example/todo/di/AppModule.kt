@@ -1,9 +1,9 @@
-package com.example.todo.other
+package com.example.todo.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.todo.db.Todo
 import com.example.todo.db.TodoDB
+import com.example.todo.other.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +22,7 @@ object AppModule{
     ) = Room.databaseBuilder(
         app,
         TodoDB::class.java,
-        Constants.DB_NAME
+            Constants.DB_NAME
     ).fallbackToDestructiveMigration()
         .build()
 
