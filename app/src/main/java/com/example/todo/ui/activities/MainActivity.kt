@@ -1,16 +1,20 @@
 package com.example.todo.ui.activities
 
 import android.app.Dialog
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ajts.androidmads.library.SQLiteToExcel
+import com.ajts.androidmads.library.SQLiteToExcel.ExportListener
 import com.example.todo.databinding.ActivityMainBinding
 import com.example.todo.databinding.AddTodoBinding
 import com.example.todo.db.Todo
+import com.example.todo.other.Constants
 import com.example.todo.ui.adapters.TodoAdapter
 import com.example.todo.ui.viewmodels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,6 +50,27 @@ class MainActivity : AppCompatActivity(), TodoAdapter.TodoListener {
             rvTodoIncomplete.apply {
                 layoutManager = LinearLayoutManager(this@MainActivity)
                 adapter = todoAdapterInComplete
+            }
+
+            export.setOnClickListener {
+                val sqliteToExcel = SQLiteToExcel(this@MainActivity, Constants.DB_NAME)
+
+                sqliteToExcel.exportAllTables("table1.xls", object : ExportListener {
+                    override fun onStart() {
+                        Toast.makeText(this@MainActivity, "Exporting...", Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onCompleted(filePath: String) {
+                        Log.d("TAG", "onCompleted: file saved in $filePath")
+                        Toast.makeText(this@MainActivity, "File Exported", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onError(e: Exception) {
+                        e.printStackTrace()
+                        Log.d("TAG", "onError: error occured: ${e.message}")
+                        Toast.makeText(this@MainActivity, "Error Occurred", Toast.LENGTH_SHORT).show()
+                    }
+                })
+
             }
 
         }
@@ -84,7 +109,7 @@ class MainActivity : AppCompatActivity(), TodoAdapter.TodoListener {
                 }
 
                 val creationTime = System.currentTimeMillis()
-                val todo = Todo(id = "$creationTime",task = taskName, isCompleted = false, creationTime = creationTime)
+                val todo = Todo(id = "$creationTime", task = taskName, isCompleted = false, creationTime = creationTime)
                 vm.upsertTodo(todo)
                 dialog.cancel()
             }
